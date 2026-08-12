@@ -1,0 +1,71 @@
+FROM archlinux:base
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+RUN echo -e "\n[lizardbyte]\nSigLevel = Optional\nServer = https://github.com/LizardByte/pacman-repo/releases/latest/download" >> /etc/pacman.conf
+RUN echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+
+# --- Base system + KDE Plasma (Wayland) + NVIDIA userspace libs ---
+RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
+    base perl \
+    lizardbyte/sunshine \
+    firefox \
+    plasma-meta \
+    kwin \
+    konsole \
+    dolphin \
+    xorg-xwayland \
+    qt5-wayland \
+    mesa \
+    nvidia-utils \
+    seatd \
+    dbus \
+    polkit \
+    pipewire \
+    pipewire-pulse \
+    sudo \
+    nvidia-settings \
+    nvtop \
+    steam \
+    mangohud \
+    umu-launcher \
+    noto-fonts noto-fonts-cjk noto-fonts-emoji xorg-xrdb xorg-xhost \
+    && pacman -Scc --noconfirm
+
+RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf \
+    && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
+    && echo "KEYMAP=us" > /etc/vconsole.conf \
+    && locale-gen
+
+# --- Non-root user to run the session ---
+RUN groupadd -g 1000 kde && \
+    useradd -u 1000 -g 1000 -m -G video,render,seat,input -s /bin/bash kde && \
+    echo "kde ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/kde 
+# Set nice
+RUN echo "kde   hard    nice    -10" >> /etc/security/limits.conf
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+WORKDIR /home/kde
+# Init config dir for kde desktop and steam, and chown to kde user
+RUN mkdir -p /home/kde/.mozilla/firefox \
+    /home/kde/.local/state/wireplumber \
+    /home/kde/.local/share/umu \
+    /home/kde/.config/dconf \
+    /run/user/1000 /run/dbus 
+
+RUN chown -R kde:kde /home/kde /run/user/1000 /run/dbus && \
+    chmod 700 /run/user/1000 
+
+USER kde
+COPY <<"EOF" /home/kde/.local/share/konsole/DefaultProfile.profile
+[General]
+Name=DefaultProfile
+Parent=FALLBACK/
+Command=/bin/bash
+EOF
+
+CMD ["/usr/local/bin/entrypoint.sh"]

@@ -1,0 +1,83 @@
+FROM opensuse/tumbleweed
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+
+# --- Update system and install packages ---
+
+# Install base KDE Plasma Wayland desktop from official repos
+RUN zypper --non-interactive install -t pattern kde kde_plasma && \
+    zypper install -y --no-recommends \
+        perl \
+        firefox-esr \
+        konsole \
+        dolphin \
+        libcap-progs \
+        dbus-1-daemon \
+        pipewire-pulseaudio \
+        xorg-x11-server \
+        xorg-x11 xhost \
+        kdeplasma6-addons \ 
+        vulkan-tools \
+        libvulkan1 \
+        libvulkan_radeon \
+        libvulkan_radeon-32bit \
+        libvulkan_intel \
+        libvulkan_intel-32bit \
+        plasma6-session \
+        xwayland \
+        discover \
+        polkit-kde-agent-6 \
+        pipewire plasma6-pa \
+        sudo seatd dbus-1 && \
+    zypper clean -a
+
+# Install NVIDIA utilities from OBS repository (optional)
+RUN zypper --non-interactive install openSUSE-repos-Tumbleweed-NVIDIA && \
+    zypper --non-interactive --no-gpg-checks refresh && \
+    zypper install -y --auto-agree-with-licenses nvidia-video-G07
+
+# Add gaming tools repository and install additional packages (optional)
+RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam
+
+# Add the sunshine repository and install sunshine (optional)
+COPY pkg/sunshine-2026.725.25407-3.2.x86_64.rpm /tmp/sunshine.rpm
+
+RUN zypper --no-gpg-checks install -y --auto-agree-with-licenses /tmp/sunshine.rpm 
+
+# Configure locale for openSUSE Tumbleweed
+RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/sysconfig/language \
+    && echo "KEYMAP=us" > /etc/vconsole.conf
+
+# --- Non-root user to run the session ---
+RUN groupadd -g 1000 kde && \
+    groupadd -g 948 seat && \
+    useradd -u 1000 -g 1000 -m -G video,render,input,seat,kde -s /bin/bash kde && \
+    echo "kde ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/kde 
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+WORKDIR /home/kde
+# Init config dir for kde desktop and steam, and chown to kde user
+RUN mkdir -p /home/kde/.mozilla/firefox \
+    /home/kde/.local/state/wireplumber \
+    /home/kde/.config/dconf \
+    /run/user/1000 /run/dbus \
+    mkdir -p /tmp/.X11-unix && \
+    chmod -R 1777 /tmp/.X11-unix    
+
+RUN chown -R kde:kde /home/kde /run/user/1000 /run/dbus && \
+    chmod 700 /run/user/1000 
+
+USER kde
+COPY <<"EOF" /home/kde/.local/share/konsole/DefaultProfile.profile
+[General]
+Name=DefaultProfile
+Parent=FALLBACK/
+Command=/bin/bash
+EOF
+
+CMD ["/usr/local/bin/entrypoint.sh"]
