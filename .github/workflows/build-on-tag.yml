@@ -22,6 +22,13 @@ jobs:
         # including multi-platform builds.
         uses: docker/setup-buildx-action@v3
 
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: hub.humanz.moe
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
+
       - name: Build and push arch linux image base
         uses: docker/build-push-action@v6
         with:
