@@ -30,7 +30,6 @@ sleep 1
 
 sudo setcap 'cap_sys_admin=+ep cap_sys_nice=+ep' /usr/bin/sunshine
 sudo -E /lib/systemd/systemd-udevd --daemon
-sudo chown 1000 -R /dev/dri
 
 if [ "$ROOTLESS" = "true" ]; then
   sudo rm /etc/sudoers.d/kde
