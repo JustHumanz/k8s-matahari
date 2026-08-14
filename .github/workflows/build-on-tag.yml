@@ -25,13 +25,15 @@ jobs:
       - name: Build and push arch linux image base
         uses: docker/build-push-action@v6
         with:
-          context: Dockerfile.archlinux
+          context: .
+          file: ./Dockerfile.archlinux
           push: true
           tags: hub.humanz.moe/gaming/matahari:archlinux-kde-${{ github.ref_name }}
 
       - name: Build and push opensuse linux image base
         uses: docker/build-push-action@v6
         with:
-          context: Dockerfile.opensuse
+          context: .
+          file: ./Dockerfile.opensuse
           push: true
           tags: hub.humanz.moe/gaming/matahari:opensuse-kde-${{ github.ref_name }}
