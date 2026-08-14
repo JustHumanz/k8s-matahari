@@ -1,0 +1,70 @@
+image:
+  repository: hub.humanz.moe/gaming/matahari
+  tag: archlinux-kde-latest
+  pullPolicy: Always
+
+persistentVolumeClaims:
+  - name: genshin-pvc
+    accessMode: ReadWriteMany
+    storageClassName: nfs-client
+    storage: 150G
+  - name: zzz-pvc
+    accessMode: ReadWriteMany
+    storageClassName: nfs-client
+    storage: 90G
+  - name: endfield-pvc
+    accessMode: ReadWriteMany
+    storageClassName: nfs-client
+    storage: 65G
+  - name: warthunder-pvc
+    accessMode: ReadWriteMany
+    storageClassName: nfs-client
+    storage: 65G
+
+service:
+  additionalPVC:
+    - name: endfield-volume
+      pvcName: endfield-pvc
+      mountPath: /mnt/data/endfield
+
+    - name: genshin-volume
+      pvcName: genshin-pvc
+      mountPath: /mnt/data/genshin
+
+    - name: zzz-volume
+      pvcName: zzz-pvc
+      mountPath: /mnt/data/zzz
+      
+    - name: warthunder-volume
+      pvcName: warthunder-pvc
+      mountPath: /mnt/data/warthunder
+
+  additionalLocalPath:
+    - name: steam-local-game
+      HostPath: /opt/steam_game/
+      mountPath: /mnt/steam_game/
+
+    - name: steam-local-shadercache
+      HostPath: /opt/steam_shadercache/
+      mountPath: /home/kde/.local/share/Steam/steamapps/shadercache
+
+  volumeClaimTemplates:
+    - name: matahari-config
+      size: 64Mi
+      storageClass: ceph-rbd
+      mountPath: /home/kde/.config/sunshine/
+      chown: True
+        
+    - name: steam-config
+      size: 20G
+      storageClass: ceph-rbd
+      mountPath: /home/kde/.local/share/Steam
+      chown: True
+
+    - name: warthunder-config
+      size: 64Mi
+      storageClass: ceph-rbd     
+      mountPath: /home/kde/.config/WarThunder 
+      chown: True
+
+    

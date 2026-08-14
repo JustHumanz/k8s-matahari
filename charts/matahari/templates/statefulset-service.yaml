@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: matahari-kde
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: matahari-kde
+spec:
+  serviceName: matahari-desktop
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: matahari-kde
+  template:
+    metadata:
+      labels:
+        app: matahari-kde
+      annotations:
+        kubectl.kubernetes.io/default-container: "pod-desktop"
+    spec:
+      runtimeClassName: {{ .Values.runtimeClassName }}
+      dnsPolicy: ClusterFirstWithHostNet
+      shareProcessNamespace: true
+      initContainers:
+        - name: chown-dir
+          image: busybox:latest
+          command: ["sh", "-c", "chown -R 1000:1000{{- range .Values.service.volumeClaimTemplates}}{{- if .chown}} {{ .mountPath }}{{- end}}{{- end }}"]
+          volumeMounts:
+{{ range .Values.service.volumeClaimTemplates }}
+{{ if .chown }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+{{ end }}
+{{ end }}
+          securityContext:
+            runAsUser: 0
+      containers:
+        - name: udevadm-desktop
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+                - SYS_NICE
+                - SYS_PTRACE
+            runAsUser: 1000
+            runAsGroup: 1000
+          command: ["/bin/bash", "-c", "udevadm monitor"]
+        - name: pod-desktop
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+                - SYS_NICE
+                - SYS_PTRACE
+            runAsUser: 1000
+            runAsGroup: 1000
+          livenessProbe:
+            tcpSocket:
+              port: sun-tcp-48010
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: sun-tcp-48010
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 2
+          ports:
+{{ range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .port }}
+              hostPort: {{ .port }}
+              protocol: {{ .protocol }}
+{{ end }}
+          env:
+{{ range .Values.service.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+{{ end }}
+          volumeMounts:
+            - name: dev-input
+              mountPath: /dev/input
+            - name: run-udev
+              mountPath: /run/udev
+            - name: dev-dri
+              mountPath: /dev/dri
+            - name: dev-fuse
+              mountPath: /dev/fuse
+            - name: dshm
+              mountPath: /dev/shm
+
+{{ range .Values.service.volumeClaimTemplates }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+{{ end }}
+
+            - name: sunshine-conf
+              mountPath: /home/kde/.config/sunshine/sunshine.conf
+              subPath: sunshine.conf
+            - name: hwmon-path
+              mountPath: /sys/class/hwmon/
+            - name: mangohud-conf
+              mountPath: /home/kde/.config/MangoHud/MangoHud.conf
+              subPath: MangoHud.conf
+
+{{ range .Values.service.additionalPVC }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+{{ end }}
+
+{{ range .Values.service.additionalLocalPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+{{ end }}
+
+      volumes:
+        - name: dev-input
+          hostPath:
+            path: /dev/input
+            type: Directory
+        - name: run-udev
+          hostPath:
+            path: /run/udev
+            type: Directory
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+        - name: dev-fuse
+          hostPath:
+            path: /dev/fuse
+        - name: sunshine-conf
+          configMap:
+            name: sunshine-config
+        - name: mangohud-conf
+          configMap:
+            name: mangohud-config
+        - name: dshm
+          emptyDir:
+            medium: Memory
+        - name: hwmon-path
+          hostPath:
+            path: /sys/class/hwmon/
+{{ range .Values.service.additionalPVC }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .pvcName }}
+{{ end }}
+
+{{ range .Values.service.additionalLocalPath }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .HostPath }}
+            type: DirectoryOrCreate
+{{ end }}
+
+      nodeSelector:
+        node: nvidia-gpu
+  volumeClaimTemplates:
+{{ range .Values.service.volumeClaimTemplates }}
+    - metadata:
+        name: {{ .name }}
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .size }}
+        storageClassName: {{ .storageClass }}
+{{ end }}

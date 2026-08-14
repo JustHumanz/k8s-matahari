@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: matahari-desktop
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: matahari-kde
+spec:
+  clusterIP: None
+  selector:
+    app: matahari-kde
+  ports:
+{{- range .Values.service.ports }}
+    - name: {{ .name }}
+      protocol: {{ .protocol }}
+      port: {{ .port }}
+{{- end }}

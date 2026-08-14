@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pvc-migration-pod
+spec:
+  restartPolicy: Never
+  volumes:
+    - name: source-volume
+      persistentVolumeClaim:
+        claimName: steam-storage-matahari-kde-0
+    - name: dest-volume
+      persistentVolumeClaim:
+        claimName: steam-config-matahari-kde-0
+  containers:
+    - name: migration-container
+      image: alpine:latest
+      command: ['sleep','9999d']
+      volumeMounts:
+        - name: source-volume
+          mountPath: /mnt/source
+        - name: dest-volume
+          mountPath: /mnt/dest

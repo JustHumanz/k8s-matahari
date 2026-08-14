@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sunshine-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: sunshine
+data:
+  sunshine.conf: |
+    origin_web_ui_allowed = wan
+    csrf_allowed_origins = {{- range until (.Values.replicaCount | int) }} https://matahari-kde-{{ . }}.matahari-desktop.{{ $.Values.namespace }}.svc.cluster.local:47990{{ end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mangohud-config
+  namespace: {{ .Values.namespace }}  
+  labels:
+    app: sunshine
+data:
+  MangoHud.conf: | {{ .Values.MangoHud | nindent 4 }}

@@ -1,0 +1,89 @@
+# Default values for matahari chart.
+replicaCount: 1
+namespace: gaming
+image:
+  repository: hub.humanz.moe/gaming/matahari
+  tag: archlinux-kde-latest
+  pullPolicy: Always
+runtimeClassName: nvidia
+
+MangoHud: |-
+  horizontal
+  legacy_layout=0
+  hud_no_margin
+  font_size=20
+  table_columns=25
+  background_alpha=0.5
+  gpu_stats
+  gpu_temp
+  cpu_stats
+  cpu_temp
+  ram
+  vram
+  fps
+  frame_timing
+  frametime
+  toggle_hud=F8
+  vulkan_driver
+
+persistentVolumeClaims:
+
+service:
+  type: ClusterIP
+  env:
+    - name: OUTPUT_MODE
+      value: "1920x1080@144"
+    - name: TIMEZONE
+      value: "Asia/Jakarta"
+    - name: KDE_PASSWORD
+      value: "SuperSecretAgent123"
+    - name: ROOTLESS
+      value: "true"
+
+  ports:
+    - name: sun-tcp-47984
+      port: 47984
+      protocol: TCP
+    - name: sun-tcp-47985
+      port: 47985
+      protocol: TCP
+    - name: sun-tcp-47986
+      port: 47986
+      protocol: TCP
+    - name: sun-tcp-47987
+      port: 47987
+      protocol: TCP
+    - name: sun-tcp-47988
+      port: 47988
+      protocol: TCP
+    - name: sun-tcp-47989
+      port: 47989
+      protocol: TCP
+    - name: sun-tcp-47990
+      port: 47990
+      protocol: TCP
+    - name: sun-tcp-48010
+      port: 48010
+      protocol: TCP
+    - name: sun-udp-47998
+      port: 47998
+      protocol: UDP
+    - name: sun-udp-47999
+      port: 47999
+      protocol: UDP
+    - name: sun-udp-48000
+      port: 48000
+      protocol: UDP
+  additionalPVC:
+
+  additionalLocalPath:
+    - name: steam-local-game
+      HostPath: /opt/steam_game/
+      mountPath: /mnt/steam_game/
+
+  volumeClaimTemplates:
+    - name: matahari-config
+      size: 64Mi
+      storageClass: ceph-rbd
+      mountPath: /home/kde/.config/sunshine/
+      chown: True

@@ -1,0 +1,37 @@
+name: Build image from git tag
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        # Buildx is a Docker CLI plugin for extended build capabilities,
+        # including multi-platform builds.
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push arch linux image base
+        uses: docker/build-push-action@v6
+        with:
+          context: Dockerfile.archlinux
+          push: true
+          tags: hub.humanz.moe/gaming/matahari:archlinux-kde-${{ github.ref_name }}
+
+      - name: Build and push opensuse linux image base
+        uses: docker/build-push-action@v6
+        with:
+          context: Dockerfile.opensuse
+          push: true
+          tags: hub.humanz.moe/gaming/matahari:opensuse-kde-${{ github.ref_name }}
