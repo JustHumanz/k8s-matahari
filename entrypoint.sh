@@ -30,6 +30,7 @@ sleep 1
 
 sudo setcap 'cap_sys_admin=+ep cap_sys_nice=+ep' /usr/bin/sunshine
 sudo -E /lib/systemd/systemd-udevd --daemon
+sudo chown 1000 -R /dev/dri
 
 if [ "$ROOTLESS" = "true" ]; then
   sudo rm /etc/sudoers.d/kde
@@ -47,11 +48,11 @@ bash -c "\
   export KWIN_DRM_DEVICES=/dev/dri/card0:/dev/dri/card1; \
   dbus-run-session bash -c '\
     pipewire & \
-    sleep 10; \
+    sleep 1; \
     wireplumber & \
-    sleep 10; \
+    sleep 1; \
     pipewire-pulse & \
-    sleep 10; \
+    sleep 1; \
     exec startplasma-wayland & \
     PLASMA_PID=\$!; \
     for i in \$(seq 1 30); do \

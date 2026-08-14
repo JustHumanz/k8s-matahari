@@ -30,13 +30,13 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         discover \
         polkit-kde-agent-6 \
         pipewire plasma6-pa \
-        sudo seatd dbus-1 && \
+        sudo seatd dbus-1 google-noto-sans-cjk-fonts && \
     zypper clean -a
 
 # Install NVIDIA utilities from OBS repository (optional)
 RUN zypper --non-interactive install openSUSE-repos-Tumbleweed-NVIDIA && \
     zypper --non-interactive --no-gpg-checks refresh && \
-    zypper install -y --auto-agree-with-licenses nvidia-video-G07
+    zypper install -y --auto-agree-with-licenses nvidia-video-G07 nvidia-compute-utils-G07
 
 # Add gaming tools repository and install additional packages (optional)
 RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam

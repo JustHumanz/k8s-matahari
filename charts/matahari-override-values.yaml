@@ -1,6 +1,6 @@
 image:
   repository: hub.humanz.moe/gaming/matahari
-  tag: opensuse-kde-v1.0.0
+  tag: opensuse-kde-v1.0.1
   pullPolicy: Always
 
 persistentVolumeClaims:
@@ -22,6 +22,16 @@ persistentVolumeClaims:
     storage: 65G
 
 service:
+  env:
+    - name: OUTPUT_MODE
+      value: "1920x1080@144"
+    - name: TIMEZONE
+      value: "Asia/Jakarta"
+    - name: KDE_PASSWORD
+      value: "SuperSecretAgent123"
+    - name: ROOTLESS
+      value: "false"
+
   additionalPVC:
     - name: endfield-volume
       pvcName: endfield-pvc
