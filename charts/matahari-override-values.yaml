@@ -28,7 +28,10 @@ service:
     - name: TIMEZONE
       value: "Asia/Jakarta"
     - name: KDE_PASSWORD
-      value: "SuperSecretAgent123"
+      valueFrom:
+        secretKeyRef:
+          name: matahari-secrets
+          key: kde-password
     - name: ROOTLESS
       value: "false"
 
