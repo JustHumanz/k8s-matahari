@@ -26,12 +26,12 @@ spec:
           image: busybox:latest
           command: ["sh", "-c", "chown -R 1000:1000{{- range .Values.service.volumeClaimTemplates}}{{- if .chown}} {{ .mountPath }}{{- end}}{{- end }}"]
           volumeMounts:
-{{ range .Values.service.volumeClaimTemplates }}
-{{ if .chown }}
+          {{ range .Values.service.volumeClaimTemplates }}
+          {{ if .chown }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
-{{ end }}
-{{ end }}
+          {{ end }}
+          {{ end }}
           securityContext:
             runAsUser: 0
       containers:
@@ -62,32 +62,26 @@ spec:
                 - SYS_PTRACE
             runAsUser: 1000
             runAsGroup: 1000
-          livenessProbe:
-            tcpSocket:
-              port: sun-tcp-48010
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
-          readinessProbe:
-            tcpSocket:
-              port: sun-tcp-48010
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 2
           ports:
-{{ range .Values.service.ports }}
+          {{ range .Values.service.ports }}
             - name: {{ .name }}
               containerPort: {{ .port }}
               hostPort: {{ .port }}
               protocol: {{ .protocol }}
-{{ end }}
+          {{ end }}
+          {{- if .Values.service.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.service.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.service.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.service.readinessProbe | nindent 12 }}          
+          {{- end }}
           env:
-{{ range .Values.service.env }}
+            {{ range .Values.service.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
-{{ end }}
+            {{ end }}
           volumeMounts:
             - name: dev-input
               mountPath: /dev/input
@@ -99,12 +93,10 @@ spec:
               mountPath: /dev/fuse
             - name: dshm
               mountPath: /dev/shm
-
-{{ range .Values.service.volumeClaimTemplates }}
+            {{ range .Values.service.volumeClaimTemplates }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
-{{ end }}
-
+            {{ end }}
             - name: sunshine-conf
               mountPath: /home/kde/.config/sunshine/sunshine.conf
               subPath: sunshine.conf
@@ -113,16 +105,14 @@ spec:
             - name: mangohud-conf
               mountPath: /home/kde/.config/MangoHud/MangoHud.conf
               subPath: MangoHud.conf
-
-{{ range .Values.service.additionalPVC }}
+            {{ range .Values.service.additionalPVC }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
-{{ end }}
-
-{{ range .Values.service.additionalLocalPath }}
+            {{ end }}
+            {{ range .Values.service.additionalLocalPath }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
-{{ end }}
+            {{ end }}
 
       volumes:
         - name: dev-input
@@ -151,18 +141,17 @@ spec:
         - name: hwmon-path
           hostPath:
             path: /sys/class/hwmon/
-{{ range .Values.service.additionalPVC }}
+        {{ range .Values.service.additionalPVC }}
         - name: {{ .name }}
           persistentVolumeClaim:
             claimName: {{ .pvcName }}
-{{ end }}
-
-{{ range .Values.service.additionalLocalPath }}
+        {{ end }}
+        {{ range .Values.service.additionalLocalPath }}
         - name: {{ .name }}
           hostPath:
             path: {{ .HostPath }}
             type: DirectoryOrCreate
-{{ end }}
+        {{ end }}
 
       nodeSelector:
         node: nvidia-gpu
