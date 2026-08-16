@@ -13,6 +13,19 @@ if [ "$OUTPUT_NAME" = "" ]; then
   echo Found the Output $OUTPUT_NAME with $OUTPUT_MODE
 fi
 
+echo "Set gid for video,render"
+# Set the video,render group
+vid_gid=$(stat -c "%g" /dev/dri/card* | head -n 1)
+if ! grep -q ${vid_gid} /etc/group; then
+  sudo groupmod -g ${vid_gid} video
+fi
+
+ren_gid=$(stat -c "%g" /dev/dri/renderD* | head -n 1)
+if ! grep -q "$ren_gid" /etc/group; then
+  sudo groupmod -g ${ren_gid} render
+fi
+
+
 # Set timezone to UTC
 sudo -E ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 
@@ -31,16 +44,12 @@ sleep 1
 sudo setcap 'cap_sys_admin=+ep cap_sys_nice=+ep' /usr/bin/sunshine
 sudo -E /lib/systemd/systemd-udevd --daemon
 
-if [ "$ROOTLESS" = "true" ]; then
-  sudo rm /etc/sudoers.d/kde
-fi
-
 # Start dbus as user
 dbus-daemon --config-file=/usr/share/dbus-1/system.conf
 # startplasma-wayland auto-detects it's running on a bare seat (no existing
 # WAYLAND_DISPLAY/DISPLAY) and will launch kwin_wayland with the DRM backend,
 # taking over the HDMI output directly.
-bash -c "\
+sudo su - kde bash -c "\
   export XDG_RUNTIME_DIR=/run/user/1000; \
   export XDG_SESSION_TYPE=wayland; \
   export KWIN_DRM_SW_CURSOR=1; \
@@ -72,6 +81,11 @@ bash -c "\
         qdbus6 org.freedesktop.PowerManagement /org/kde/Solid/PowerManagement org.kde.Solid.PowerManagement.refreshStatus
     fi; \
     export XAUTHORITY=/run/user/1000/xauth_*; \
+
+    if [ "$ROOTLESS" = "true" ]; then
+      sudo rm /etc/sudoers.d/kde
+    fi
+
     echo \"Starting Sunshine...\"; \
     env WAYLAND_DISPLAY=wayland-0 XDG_SESSION_TYPE=wayland sunshine /home/kde/.config/sunshine/sunshine.conf
   '"

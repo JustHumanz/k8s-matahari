@@ -1,6 +1,6 @@
 image:
   repository: hub.humanz.moe/gaming/matahari
-  tag: opensuse-kde-v1.0.1
+  tag: opensuse-kde-dev
   pullPolicy: Always
 
 persistentVolumeClaims:
