@@ -1,4 +1,4 @@
-name: Build image from git tag
+name: Build the arch linux base image from git tag
 
 on:
   push:
@@ -36,12 +36,8 @@ jobs:
           context: .
           file: ./Dockerfile.archlinux
           push: true
-          tags: hub.humanz.moe/gaming/matahari:archlinux-kde-${{ github.ref_name }}
-
-      - name: Build and push opensuse linux image base
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.opensuse
-          push: true
-          tags: hub.humanz.moe/gaming/matahari:opensuse-kde-${{ github.ref_name }}
+          tags: hub.humanz.moe/gaming/matahari:archlinux-kde-nvidia-${{ github.ref_name }}
+          build-args: |
+            GPU=NVIDIA
+      
+      ### TODO: build the image for amd gpu

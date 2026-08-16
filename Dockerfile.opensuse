@@ -3,12 +3,14 @@ FROM opensuse/tumbleweed
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
+ENV TERM=xterm-256color
 
 # --- Update system and install packages ---
 
 # Install base KDE Plasma Wayland desktop from official repos
 RUN zypper --non-interactive install -t pattern kde kde_plasma && \
     zypper install -y --no-recommends \
+        wget \
         perl \
         firefox-esr \
         konsole \
@@ -30,13 +32,17 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         discover \
         polkit-kde-agent-6 \
         pipewire plasma6-pa \
+        libva-drm2 \
         sudo seatd dbus-1 google-noto-sans-cjk-fonts && \
     zypper clean -a
 
 # Install NVIDIA utilities from OBS repository (optional)
-RUN zypper --non-interactive install openSUSE-repos-Tumbleweed-NVIDIA && \
-    zypper --non-interactive --no-gpg-checks refresh && \
-    zypper install -y --auto-agree-with-licenses nvidia-video-G07 nvidia-compute-utils-G07
+ARG GPU=NVIDIA
+ARG NVIDIA_DRIVER_VERSION=595.71.05
+
+COPY pkg/opensuse-nvidia.sh /tmp/nvidia.sh
+RUN chmod +x /tmp/nvidia.sh && \
+    ./tmp/nvidia.sh
 
 # Add gaming tools repository and install additional packages (optional)
 RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam
@@ -65,7 +71,9 @@ WORKDIR /home/kde
 RUN mkdir -p /home/kde/.mozilla/firefox \
     /home/kde/.local/state/wireplumber \
     /home/kde/.config/dconf \
-    /run/user/1000 /run/dbus \
+    /home/kde/.fontconfig \
+    /home/kde/.cache/fontconfig \
+    /run/user/1000 /run/dbus && \
     mkdir -p /tmp/.X11-unix && \
     chmod -R 1777 /tmp/.X11-unix    
 
