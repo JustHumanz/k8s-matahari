@@ -1,6 +1,6 @@
 image:
   repository: hub.humanz.moe/gaming/matahari
-  tag: opensuse-kde-dev
+  tag: archlinux-kde-nvidia-v1.1.2
   pullPolicy: Always
 
 persistentVolumeClaims:
