@@ -27,11 +27,6 @@ service:
       value: "1920x1080@144"
     - name: TIMEZONE
       value: "Asia/Jakarta"
-    - name: KDE_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: matahari-secrets
-          key: kde-password
     - name: ROOTLESS
       value: "false"
 
