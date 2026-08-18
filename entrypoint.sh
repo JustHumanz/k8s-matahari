@@ -10,6 +10,11 @@ ROOTLESS="${ROOTLESS:-false}"
 if [ "$OUTPUT_NAME" = "" ]; then
   echo OUTPUT_NAME env is empty, trying to find one
   export OUTPUT_NAME=$(for i in $(ls /sys/class/drm/*/status); do   grep connected -owq "$i" && basename $(dirname "$i") | sed 's/^card[0-9]*-//'; done)
+
+  if [ "$OUTPUT_NAME" = "" ]; then
+    echo "[ERROR] Display not found"
+    exit 1
+  fi
   echo Found the Output $OUTPUT_NAME with $OUTPUT_MODE
 fi
 
