@@ -75,13 +75,16 @@ spec:
           {{- end }}
           {{- if .Values.service.readinessProbe }}
           readinessProbe:
-            {{- toYaml .Values.service.readinessProbe | nindent 12 }}          
+            {{- toYaml .Values.service.readinessProbe | nindent 12 }}
           {{- end }}
           env:
-            {{ range .Values.service.env }}
+          {{- range .Values.service.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
-            {{ end }}
+          {{- end }}
+          ## KDE desktop password
+            - name: KDE_PASSWORD
+              value: {{ .Values.service.secret.desktopPassword }}
           volumeMounts:
             - name: dev-input
               mountPath: /dev/input

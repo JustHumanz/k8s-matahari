@@ -35,10 +35,11 @@ service:
       value: "1920x1080@144"
     - name: TIMEZONE
       value: "Asia/Jakarta"
-    - name: KDE_PASSWORD
-      value: "SuperSecretAgent123"
     - name: ROOTLESS
       value: "true"
+
+  secret:
+    desktopPassword: "SuperSecretAgent123"
 
   ports:
     - name: sun-tcp-47984
