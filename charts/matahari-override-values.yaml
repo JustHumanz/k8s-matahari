@@ -28,7 +28,7 @@ service:
     - name: TIMEZONE
       value: "Asia/Jakarta"
     - name: ROOTLESS
-      value: "false"
+      value: "true"
 
   additionalPVC:
     - name: endfield-volume
