@@ -34,6 +34,24 @@ spec:
           {{ end }}
           securityContext:
             runAsUser: 0
+        {{ if not (empty .Values.configMap.steamBootstrap) }}
+        - name: steambootstrap
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          command: ["/bin/sh", "-c", "cd /tmp;chmod +x /tmp/non_steam.sh;./non_steam.sh"]
+          volumeMounts:
+          {{ range .Values.service.volumeClaimTemplates }}
+          {{ if .chown }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{ end }}
+          {{ end }}
+            - name: non-steam-script
+              mountPath: /tmp/non_steam.sh
+              subPath: non_steam.sh          
+          securityContext:
+            runAsUser: 1000
+
+        {{ end }}
       containers:
         - name: udevadm-desktop
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -138,6 +156,10 @@ spec:
         - name: mangohud-conf
           configMap:
             name: mangohud-config
+        - name: non-steam-script
+          configMap:
+            name: non-steam-bootstrap     
+            defaultMode: 0777
         - name: dshm
           emptyDir:
             medium: Memory

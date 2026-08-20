@@ -3,6 +3,70 @@ image:
   tag: archlinux-kde-nvidia-v1.1.2
   pullPolicy: Always
 
+configMap:
+  MangoHud: |-
+    horizontal
+    legacy_layout=0
+    hud_no_margin
+    font_size=20
+    table_columns=25
+    background_alpha=0.5
+    gpu_stats
+    gpu_temp
+    cpu_stats
+    cpu_temp
+    ram
+    vram
+    fps
+    frame_timing
+    frametime
+    toggle_hud=F8
+    vulkan_driver
+  steamBootstrap: |-
+    # Add Endfield
+    if ! ./nonsteam get | grep -q 'Endfield'; then
+        echo "Add Endfield into non steam library"
+        ./nonsteam add -w \
+          --app-name "Endfield" \
+          --exe '"/mnt/data/endfield/Arknights Endfield/Endfield.exe"' \
+          --start-dir '"/mnt/data/endfield/Arknights Endfield/"' \
+          --image-grid "https://cdn2.steamgriddb.com/thumb/3cc09d31a1a2fa7feefe07f98c86fa38.jpg" \
+          --image-grid-horiz "https://cdn2.steamgriddb.com/thumb/e8f228a7a271a68d2fd509eb6eff0dda.jpg" \
+          --image-hero "https://cdn2.steamgriddb.com/hero_thumb/9c9c19e67f8f780d141617a7ba01ca07.jpg" \
+          --image-logo "https://cdn2.steamgriddb.com/logo_thumb/26a790312677cb9db0bd51574b7fe6d3.png" \
+          --launch-options "mangohud %command%" \
+          --allow-overlay
+    fi
+
+    # Add ZZZ
+    if ! ./nonsteam get | grep -q 'Zenless Zone Zero'; then
+        echo "Add Zenless Zone Zero into non steam library"
+        ./nonsteam add -w \
+          --app-name "Zenless Zone Zero" \
+          --exe '"/mnt/data/zzz/ZenlessZoneZero Game/ZenlessZoneZero.exe"' \
+          --start-dir '"/mnt/data/zzz/ZenlessZoneZero Game/"' \
+          --image-grid "https://cdn2.steamgriddb.com/thumb/0f0484801bfa9c86c801cf09c406dda2.jpg" \
+          --image-grid-horiz "https://cdn2.steamgriddb.com/thumb/edcf636a6fbc1e73d34b5187a8f47a64.jpg" \
+          --image-hero "https://cdn2.steamgriddb.com/hero_thumb/6bdbba1550f1b2188e81c30c92491d12.webm" \
+          --image-logo "https://cdn2.steamgriddb.com/logo_thumb/6636876050dcade8ec8e3023b1afe9bc.png" \
+          --launch-options "mangohud %command%" \
+          --allow-overlay
+    fi
+
+    # Add Genshin
+    if ! ./nonsteam get | grep -q 'Genshin impact'; then
+        echo "Add Genshin impact into non steam library"
+        ./nonsteam add -w \
+          --app-name "Genshin impact" \
+          --exe '"/mnt/data/genshin/Genshin Impact game/GenshinImpact.exe"' \
+          --start-dir '"/mnt/data/genshin/Genshin Impact game/"' \
+          --image-grid "https://cdn2.steamgriddb.com/thumb/a38cdef9f6c911c17932d6214d8a31d2.jpg" \
+          --image-grid-horiz "https://cdn2.steamgriddb.com/thumb/a0e58c078833b1ff8654ae48cdc26267.jpg" \
+          --image-hero "https://cdn2.steamgriddb.com/hero_thumb/58c80ac32913fe75b84cf00a8eed5515.jpg" \
+          --image-logo "https://cdn2.steamgriddb.com/logo_thumb/944eefd22dfe99fe7631b8ecc732c7cf.png" \
+          --launch-options "mangohud %command%" \
+          --allow-overlay
+    fi
 persistentVolumeClaims:
   - name: genshin-pvc
     accessMode: ReadWriteMany
