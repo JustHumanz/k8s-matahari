@@ -5,6 +5,8 @@ OUTPUT_MODE="${OUTPUT_MODE:-1024x768@60}"
 TIMEZONE="${TIMEZONE:-UTC}"
 KDE_PASSWORD="${KDE_PASSWORD:-SuperSecretAgent}"
 WALLPAPER_URL="${WALLPAPER_URL:-https://storage.humanz.moe/humanz-blog/kano_indie.jpg}"
+LOCK_SCRREN_WALLPAPER_URL="${LOCK_SCRREN_WALLPAPER_URL:-$WALLPAPER_URL}"
+PROFILE_PIC_RUL="${PROFILE_PIC_RUL:-https://storage.humanz.moe/humanz-blog/EMi9P6hUYAAYTlB-modified.png}"
 ROOTLESS="${ROOTLESS:-false}"
 
 if [ "$OUTPUT_NAME" = "" ]; then
@@ -38,7 +40,11 @@ sudo -E ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 echo "kde:$KDE_PASSWORD" | sudo -E chpasswd
 
 # Fetch wallpaper
-curl -s -o /tmp/wallpaper.jpg $WALLPAPER_URL
+TMP_FILE=$(mktemp -d)
+curl -s -o ${TMP_FILE}/wallpaper.png $WALLPAPER_URL
+curl -s -o ${TMP_FILE}/lock_wallpaper.png $LOCK_SCRREN_WALLPAPER_URL
+curl -s -o /home/kde/.face.png $PROFILE_PIC_RUL
+ln -s /home/kde/.face.png /home/kde/.face.icon
 
 # seatd manages device/seat access (VT switching, input, DRM master)
 # without needing a full systemd-logind stack inside the container.
@@ -79,7 +85,8 @@ sudo su - kde bash -c "\
     if [ -n \"$OUTPUT_NAME\" ] && [ -n \"$OUTPUT_MODE\" ]; then \
       kscreen-doctor output.$OUTPUT_NAME.scale.1; \
       kscreen-doctor output.$OUTPUT_NAME.mode.$OUTPUT_MODE; \
-      plasma-apply-wallpaperimage /tmp/wallpaper.jpg; \
+      plasma-apply-wallpaperimage $TMP_FILE/wallpaper.png; \
+      kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General --key Image \"file://$TMP_FILE/lock_wallpaper.png\"; \
       kwriteconfig6 --file /home/kde/.config/powerdevilrc --notify --group AC --group Display --key TurnOffDisplayIdleTimeoutSec -- -1 && \
         kwriteconfig6 --file konsolerc --group \"Desktop Entry\" --key \"DefaultProfile\" \"DefaultProfile.profile\" && \
         qdbus6 org.freedesktop.PowerManagement /org/kde/Solid/PowerManagement org.kde.Solid.PowerManagement.reparseConfiguration && \
