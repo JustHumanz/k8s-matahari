@@ -1,6 +1,6 @@
 image:
   repository: hub.humanz.moe/gaming/matahari
-  tag: archlinux-kde-nvidia-v1.1.2
+  tag: archlinux-kde-nvidia-dev
   pullPolicy: Always
 
 persistentVolumeClaims:
@@ -29,6 +29,8 @@ service:
       value: "Asia/Jakarta"
     - name: ROOTLESS
       value: "true"
+    - name: LOCK_SCRREN_WALLPAPER_URL
+      value: https://storage.humanz.moe/humanz-blog/kano_matchach.jpeg
 
   additionalPVC:
     - name: endfield-volume
