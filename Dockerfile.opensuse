@@ -33,6 +33,7 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         polkit-kde-agent-6 \
         pipewire plasma6-pa \
         libva-drm2 \
+        protontricks \
         sudo seatd dbus-1 google-noto-sans-cjk-fonts && \
     zypper clean -a
 

@@ -29,6 +29,7 @@ RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
     mangohud \
     wget \
     fakeroot debugedit patch \
+    protontricks \
     noto-fonts noto-fonts-cjk noto-fonts-emoji xorg-xrdb xorg-xhost \
     && pacman -Scc --noconfirm
 
