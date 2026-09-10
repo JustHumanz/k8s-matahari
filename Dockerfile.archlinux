@@ -4,8 +4,8 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
-RUN echo -e "\n[lizardbyte]\nSigLevel = Optional\nServer = https://github.com/LizardByte/pacman-repo/releases/latest/download" >> /etc/pacman.conf
-RUN echo -e "\n[multilib]\nInclude = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
+RUN printf '%s\n' "[lizardbyte]" "SigLevel = Optional" "Server = https://github.com/LizardByte/pacman-repo/releases/latest/download" >> /etc/pacman.conf && \
+    printf '%s\n' "" "[multilib]" "Include = /etc/pacman.d/mirrorlist" >> /etc/pacman.conf
 
 # --- Base system + KDE Plasma (Wayland) ---
 RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
@@ -68,7 +68,7 @@ RUN mkdir -p /home/kde/.mozilla/firefox \
 RUN chown -R kde:kde /home/kde /run/user/1000 /run/dbus && \
     chmod 700 /run/user/1000 
 
-USER kde
+USER 1000:1000
 COPY <<"EOF" /home/kde/.local/share/konsole/DefaultProfile.profile
 [General]
 Name=DefaultProfile
