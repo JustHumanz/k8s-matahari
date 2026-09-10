@@ -1,4 +1,4 @@
-name: Dockerfile Lint
+name: Docker and Kubernetes Lint
 
 on:
   pull_request:
@@ -9,6 +9,7 @@ on:
     paths:
       - 'Dockerfile.archlinux'
       - 'Dockerfile.opensuse'
+      - 'charts/**'
       - '.github/workflows/image-linter.yml'
 
 jobs:
@@ -31,3 +32,22 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ${{ matrix.dockerfile }}
+
+  lint-kubernetes-manifests:
+    name: Lint Kubernetes manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.15.4
+
+      - name: Lint Helm chart
+        run: helm lint ./charts/matahari
+
+      - name: Render manifests
+        run: helm template matahari ./charts/matahari >/tmp/matahari-rendered.yaml
