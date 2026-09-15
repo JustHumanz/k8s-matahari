@@ -39,7 +39,7 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
 
 # Install NVIDIA utilities from OBS repository (optional)
 ARG GPU=NVIDIA
-ARG NVIDIA_DRIVER_VERSION=595.71.05
+ARG NVIDIA_DRIVER_VERSION=615.71.09
 
 COPY pkg/opensuse-nvidia.sh /tmp/nvidia.sh
 RUN chmod +x /tmp/nvidia.sh && \
