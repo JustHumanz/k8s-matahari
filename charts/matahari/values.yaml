@@ -26,7 +26,7 @@ configMap:
     frametime
     toggle_hud=F8
     vulkan_driver
-  steamBootstrap: 
+  steamBootstrap: ""
 
 persistentVolumeClaims:
 

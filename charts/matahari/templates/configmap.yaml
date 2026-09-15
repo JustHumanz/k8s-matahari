@@ -35,4 +35,4 @@ data:
     cd /tmp
     tar -zxf nonsteam-linux-x64-0.7.0.tar.gz
     cd nonsteam-linux-x64-0.7.0
-    {{ .Values.configMap.steamBootstrap | nindent 4 }}
+    {{ default "" .Values.configMap.steamBootstrap | nindent 4 }}

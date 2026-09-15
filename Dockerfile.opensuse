@@ -1,4 +1,5 @@
-FROM opensuse/tumbleweed
+# hadolint ignore=DL3007
+FROM opensuse/tumbleweed:latest
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
@@ -8,6 +9,7 @@ ENV TERM=xterm-256color
 # --- Update system and install packages ---
 
 # Install base KDE Plasma Wayland desktop from official repos
+# hadolint ignore=DL3037
 RUN zypper --non-interactive install -t pattern kde kde_plasma && \
     zypper install -y --no-recommends \
         wget \
@@ -20,7 +22,7 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         pipewire-pulseaudio \
         xorg-x11-server \
         xorg-x11 xhost \
-        kdeplasma6-addons \ 
+        kdeplasma6-addons \
         vulkan-tools \
         libvulkan1 \
         libvulkan_radeon \
@@ -46,12 +48,15 @@ RUN chmod +x /tmp/nvidia.sh && \
     ./tmp/nvidia.sh
 
 # Add gaming tools repository and install additional packages (optional)
-RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam
+# hadolint ignore=DL3037
+RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam && \
+    zypper clean -a
 
 # Add the sunshine repository and install sunshine (optional)
 COPY pkg/sunshine-2026.725.25407-3.2.x86_64.rpm /tmp/sunshine.rpm
 
-RUN zypper --no-gpg-checks install -y --auto-agree-with-licenses /tmp/sunshine.rpm 
+RUN zypper --no-gpg-checks install -y --auto-agree-with-licenses /tmp/sunshine.rpm && \
+    zypper clean -a
 
 # Configure locale for openSUSE Tumbleweed
 RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf \
@@ -81,7 +86,7 @@ RUN mkdir -p /home/kde/.mozilla/firefox \
 RUN chown -R kde:kde /home/kde /run/user/1000 /run/dbus && \
     chmod 700 /run/user/1000 
 
-USER kde
+USER 1000:1000
 COPY <<"EOF" /home/kde/.local/share/konsole/DefaultProfile.profile
 [General]
 Name=DefaultProfile
