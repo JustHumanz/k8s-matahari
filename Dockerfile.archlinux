@@ -34,7 +34,7 @@ RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
     && pacman -Scc --noconfirm
 
 ARG GPU=NVIDIA
-ARG NVIDIA_DRIVER_VERSION=595.71.05-1
+ARG NVIDIA_DRIVER_VERSION=615.71.09-1
 
 COPY pkg/arch-nvidia.sh /tmp/nvidia.sh
 RUN chmod +x /tmp/nvidia.sh && \
