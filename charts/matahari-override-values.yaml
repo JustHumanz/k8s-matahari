@@ -67,23 +67,6 @@ configMap:
           --launch-options "mangohud %command%" \
           --allow-overlay
     fi
-persistentVolumeClaims:
-  - name: genshin-pvc
-    accessMode: ReadWriteMany
-    storageClassName: nfs-client
-    storage: 150G
-  - name: zzz-pvc
-    accessMode: ReadWriteMany
-    storageClassName: nfs-client
-    storage: 90G
-  - name: endfield-pvc
-    accessMode: ReadWriteMany
-    storageClassName: nfs-client
-    storage: 65G
-  - name: warthunder-pvc
-    accessMode: ReadWriteMany
-    storageClassName: nfs-client
-    storage: 65G
 
 service:
   env:
