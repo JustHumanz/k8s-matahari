@@ -8,6 +8,7 @@ WALLPAPER_URL="${WALLPAPER_URL:-https://storage.humanz.moe/humanz-blog/kano_indi
 LOCK_SCRREN_WALLPAPER_URL="${LOCK_SCRREN_WALLPAPER_URL:-$WALLPAPER_URL}"
 PROFILE_PIC_RUL="${PROFILE_PIC_RUL:-https://storage.humanz.moe/humanz-blog/EMi9P6hUYAAYTlB-modified.png}"
 ROOTLESS="${ROOTLESS:-false}"
+AUTO_START="${AUTO_START:-steam}"
 
 if [ "$OUTPUT_NAME" = "" ]; then
   echo OUTPUT_NAME env is empty, trying to find one
@@ -45,6 +46,18 @@ curl -s -o ${TMP_FILE}/wallpaper.png $WALLPAPER_URL
 curl -s -o ${TMP_FILE}/lock_wallpaper.png $LOCK_SCRREN_WALLPAPER_URL
 curl -s -o /home/kde/.face.png $PROFILE_PIC_RUL
 ln -s /home/kde/.face.png /home/kde/.face.icon
+
+# Set auto start
+IFS="," read -ra APPS <<< "$AUTO_START"
+mkdir -p /home/kde/.config/autostart/
+for app in "${APPS[@]}"; do
+    echo Validate ${app} desktop file
+    if [[ $(find /usr/share/applications/ -name $app | grep .) -eq 0 ]];
+    then
+      echo Copy ${app} desktop file into autostart
+      cp /usr/share/applications/${app}.desktop /home/kde/.config/autostart/
+    fi
+done
 
 # seatd manages device/seat access (VT switching, input, DRM master)
 # without needing a full systemd-logind stack inside the container.
