@@ -36,8 +36,18 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         pipewire plasma6-pa \
         libva-drm2 \
         protontricks \
-        sudo seatd dbus-1 google-noto-sans-cjk-fonts && \
-    zypper clean -a
+        sudo seatd dbus-1 google-noto-sans-cjk-fonts
+
+RUN zypper --non-interactive install -y boost-devel libminiupnpc21 \
+    libboost_log-devel \
+    libboost_program_options-devel
+
+# Patch for sunsine
+RUN ln -sf /usr/lib64/libboost_log.so /usr/lib64/libboost_log.so.1.91.0 && \
+    ln -sf /usr/lib64/libboost_program_options.so /usr/lib64/libboost_program_options.so.1.91.0 && \
+    ln -sf /usr/lib64/libboost_filesystem.so.1.92.0 /usr/lib64/libboost_filesystem.so.1.91.0 && \
+    ln -sf /usr/lib64/libboost_thread.so /usr/lib64/libboost_thread.so.1.91.0
+
 
 # Install NVIDIA utilities from OBS repository (optional)
 ARG GPU=NVIDIA
@@ -49,14 +59,19 @@ RUN chmod +x /tmp/nvidia.sh && \
 
 # Add gaming tools repository and install additional packages (optional)
 # hadolint ignore=DL3037
-RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam && \
-    zypper clean -a
+RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam
 
 # Add the sunshine repository and install sunshine (optional)
-COPY pkg/sunshine-2026.725.25407-3.2.x86_64.rpm /tmp/sunshine.rpm
+RUN zypper addrepo  https://download.opensuse.org/repositories/games:/tools/openSUSE_Tumbleweed/games:tools.repo && \
+    zypper --non-interactive --gpg-auto-import-keys up
+RUN zypper --non-interactive install -y libboost_filesystem*-devel &&\
+    zypper --pkg-cache-dir /tmp download sunshine
 
-RUN zypper --no-gpg-checks install -y --auto-agree-with-licenses /tmp/sunshine.rpm && \
-    zypper clean -a
+RUN rpm -i --nodeps /tmp/games_tools/x86_64/*.rpm && \
+    rm -rf /tmp/games_tools
+
+# Clean pkg
+RUN zypper clean -a
 
 # Configure locale for openSUSE Tumbleweed
 RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf \
