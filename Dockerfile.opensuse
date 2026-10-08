@@ -67,8 +67,6 @@ RUN zypper addrepo  https://download.opensuse.org/repositories/games:/tools/open
 RUN zypper --non-interactive install -y libboost_filesystem*-devel &&\
     zypper --pkg-cache-dir /tmp download sunshine
 
-RUN rpm -i --nodeps /tmp/games_tools/x86_64/*.rpm && \
-    rm -rf /tmp/games_tools
 
 # Clean pkg
 RUN zypper clean -a
