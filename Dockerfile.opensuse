@@ -36,6 +36,7 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         pipewire plasma6-pa \
         libva-drm2 \
         protontricks \
+        gstreamer gstreamer-plugins-base gstreamer-plugins-good gstreamer-plugins-bad gstreamer-plugins-ugly \
         sudo seatd dbus-1 google-noto-sans-cjk-fonts
 
 RUN zypper --non-interactive install -y boost-devel libminiupnpc21 \
@@ -69,9 +70,6 @@ RUN zypper --non-interactive install -y libboost_filesystem*-devel &&\
 
 RUN rpm -i --nodeps /tmp/games_tools/x86_64/*.rpm && \
     rm -rf /tmp/games_tools
-
-# Clean pkg
-RUN zypper clean -a
 
 # Configure locale for openSUSE Tumbleweed
 RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf \
