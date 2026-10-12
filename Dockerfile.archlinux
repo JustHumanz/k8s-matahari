@@ -30,6 +30,7 @@ RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
     wget \
     fakeroot debugedit patch \
     protontricks \
+    gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav \
     noto-fonts noto-fonts-cjk noto-fonts-emoji xorg-xrdb xorg-xhost \
     && pacman -Scc --noconfirm
 
