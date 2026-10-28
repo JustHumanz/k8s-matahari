@@ -45,6 +45,10 @@ spec:
               mountPath: {{ .mountPath }}
           {{ end }}
           {{ end }}
+          {{ range .Values.service.additionalPVC }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+          {{ end }}          
             - name: non-steam-script
               mountPath: /tmp/non_steam.sh
               subPath: non_steam.sh          

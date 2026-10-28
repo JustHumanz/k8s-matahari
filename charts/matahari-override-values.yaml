@@ -23,6 +23,24 @@ configMap:
     toggle_hud=F8
     vulkan_driver
   steamBootstrap: |-
+    # Add steam compatibility tools
+    COMPAT_DIR="/home/kde/.local/share/Steam/compatibilitytools.d"
+    TOOL_DIR="$COMPAT_DIR/dwproton-11.0-15-x86_64"
+    TOOL_ARCHIVE="dwproton-11.0-15-x86_64.tar.xz"
+
+    mkdir -p "$COMPAT_DIR"
+    cd "$COMPAT_DIR" || exit 1
+
+    if [ -d "$TOOL_DIR" ]; then
+        echo "Dwproton already installed at $TOOL_DIR"
+    else
+        echo "Downloading Dwproton compatibility tools"
+        wget "https://dawn.wine/dawn-winery/dwproton/releases/download/dwproton-11.0-15/dwproton-11.0-15-x86_64.tar.xz" -O "$TOOL_ARCHIVE"
+        tar -xf "$TOOL_ARCHIVE"
+        chown -R 1000:1000 "$TOOL_DIR"
+        rm -f "$TOOL_ARCHIVE"
+    fi
+
     # Add Endfield
     if ! ./nonsteam get | grep -q 'Endfield'; then
         echo "Add Endfield into non steam library"
@@ -80,6 +98,10 @@ service:
       value: https://storage.humanz.moe/humanz-blog/kano_matchach.jpeg
 
   additionalPVC:
+    - name: steam-compatibilitytools
+      pvcName: steam-compatibilitytools-pvc
+      mountPath: /home/kde/.local/share/Steam/compatibilitytools.d
+
     - name: endfield-volume
       pvcName: endfield-pvc
       mountPath: /mnt/data/endfield
@@ -91,7 +113,7 @@ service:
     - name: zzz-volume
       pvcName: zzz-pvc
       mountPath: /mnt/data/zzz
-      
+
     - name: warthunder-volume
       pvcName: warthunder-pvc
       mountPath: /mnt/data/warthunder
@@ -111,7 +133,7 @@ service:
       storageClass: ceph-rbd
       mountPath: /home/kde/.config/sunshine/
       chown: True
-        
+
     - name: steam-config
       size: 20G
       storageClass: ceph-rbd
@@ -120,8 +142,6 @@ service:
 
     - name: warthunder-config
       size: 64Mi
-      storageClass: ceph-rbd     
-      mountPath: /home/kde/.config/WarThunder 
+      storageClass: ceph-rbd
+      mountPath: /home/kde/.config/WarThunder
       chown: True
-
-    
