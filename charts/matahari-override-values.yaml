@@ -23,6 +23,21 @@ configMap:
     toggle_hud=F8
     vulkan_driver
   steamBootstrap: |-
+    # Add Genshin
+    if ! ./nonsteam get | grep -q 'Genshin impact'; then
+        echo "Add Genshin impact into non steam library"
+        ./nonsteam add -w \
+          --app-name "Genshin impact" \
+          --exe '"/mnt/data/genshin/Genshin Impact game/GenshinImpact.exe"' \
+          --start-dir '"/mnt/data/genshin/Genshin Impact game/"' \
+          --image-grid "https://cdn2.steamgriddb.com/thumb/a38cdef9f6c911c17932d6214d8a31d2.jpg" \
+          --image-grid-horiz "https://cdn2.steamgriddb.com/thumb/a0e58c078833b1ff8654ae48cdc26267.jpg" \
+          --image-hero "https://cdn2.steamgriddb.com/hero_thumb/58c80ac32913fe75b84cf00a8eed5515.jpg" \
+          --image-logo "https://cdn2.steamgriddb.com/logo_thumb/944eefd22dfe99fe7631b8ecc732c7cf.png" \
+          --launch-options "mangohud %command%" \
+          --allow-overlay
+    fi
+
     # Add steam compatibility tools
     COMPAT_DIR="/home/kde/.local/share/Steam/compatibilitytools.d"
     TOOL_DIR="$COMPAT_DIR/dwproton-11.0-15-x86_64"
@@ -39,21 +54,6 @@ configMap:
         tar -xf "$TOOL_ARCHIVE"
         chown -R 1000:1000 "$TOOL_DIR"
         rm -f "$TOOL_ARCHIVE"
-    fi
-
-    # Add Genshin
-    if ! ./nonsteam get | grep -q 'Genshin impact'; then
-        echo "Add Genshin impact into non steam library"
-        ./nonsteam add -w \
-          --app-name "Genshin impact" \
-          --exe '"/mnt/data/genshin/Genshin Impact game/GenshinImpact.exe"' \
-          --start-dir '"/mnt/data/genshin/Genshin Impact game/"' \
-          --image-grid "https://cdn2.steamgriddb.com/thumb/a38cdef9f6c911c17932d6214d8a31d2.jpg" \
-          --image-grid-horiz "https://cdn2.steamgriddb.com/thumb/a0e58c078833b1ff8654ae48cdc26267.jpg" \
-          --image-hero "https://cdn2.steamgriddb.com/hero_thumb/58c80ac32913fe75b84cf00a8eed5515.jpg" \
-          --image-logo "https://cdn2.steamgriddb.com/logo_thumb/944eefd22dfe99fe7631b8ecc732c7cf.png" \
-          --launch-options "mangohud %command%" \
-          --allow-overlay
     fi
 
 service:
