@@ -105,7 +105,7 @@ service:
       chown: True
 
     - name: steam-config
-      size: 20G
+      size: 30G
       storageClass: ceph-rbd
       mountPath: /home/kde/.local/share/Steam
       chown: True
