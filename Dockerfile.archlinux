@@ -70,11 +70,7 @@ RUN chown -R kde:kde /home/kde /run/user/1000 /run/dbus && \
     chmod 700 /run/user/1000 
 
 USER 1000:1000
-COPY <<"EOF" /home/kde/.local/share/konsole/DefaultProfile.profile
-[General]
-Name=DefaultProfile
-Parent=FALLBACK/
-Command=/bin/bash
-EOF
+RUN mkdir -p /home/kde/.local/share/konsole && \
+    printf '%s\n' '[General]' 'Name=DefaultProfile' 'Parent=FALLBACK/' 'Command=/bin/bash' > /home/kde/.local/share/konsole/DefaultProfile.profile
 
 CMD ["/usr/local/bin/entrypoint.sh"]
