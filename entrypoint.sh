@@ -12,7 +12,13 @@ AUTO_START="${AUTO_START:-steam}"
 
 if [ "$OUTPUT_NAME" = "" ]; then
   echo OUTPUT_NAME env is empty, trying to find one
-  export OUTPUT_NAME=$(for i in $(ls /sys/class/drm/*/status); do   grep connected -owq "$i" && basename $(dirname "$i") | sed 's/^card[0-9]*-//'; done)
+  for status in /sys/class/drm/*/status; do
+    if grep -qw connected "$status"; then
+      OUTPUT_NAME=$(basename "$(dirname "$status")")
+      export OUTPUT_NAME="${OUTPUT_NAME#card[0-9]*-}"
+      break
+    fi
+  done
 
   if [ "$OUTPUT_NAME" = "" ]; then
     echo "[ERROR] Display not found"
@@ -21,41 +27,45 @@ if [ "$OUTPUT_NAME" = "" ]; then
   echo Found the Output $OUTPUT_NAME with $OUTPUT_MODE
 fi
 
-echo "Set gid for video,render"
-# Set the video,render group
-vid_gid=$(stat -c "%g" /dev/dri/card* | head -n 1)
-if ! grep -q ${vid_gid} /etc/group; then
-  sudo groupmod -g ${vid_gid} video
-fi
+# Align group gids with the device nodes passed into the container
+set_group_gid() {
+  local group="$1" gid
+  shift
+  gid=$(stat -c "%g" "$@" | head -n 1)
+  getent group "$gid" >/dev/null || sudo groupmod -g "$gid" "$group"
+}
 
-ren_gid=$(stat -c "%g" /dev/dri/renderD* | head -n 1)
-if ! grep -q "$ren_gid" /etc/group; then
-  sudo groupmod -g ${ren_gid} render
-fi
+echo "Set gid for video,render"
+set_group_gid video /dev/dri/card*
+set_group_gid render /dev/dri/renderD*
 
 
 # Set timezone to UTC
-sudo -E ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
+sudo -E ln -sf "/usr/share/zoneinfo/$TIMEZONE" /etc/localtime
 
 # Set password
 echo "kde:$KDE_PASSWORD" | sudo -E chpasswd
 
 # Fetch wallpaper
 TMP_FILE=$(mktemp -d)
-curl -s -o ${TMP_FILE}/wallpaper.png $WALLPAPER_URL
-curl -s -o ${TMP_FILE}/lock_wallpaper.png $LOCK_SCRREN_WALLPAPER_URL
-curl -s -o /home/kde/.face.png $PROFILE_PIC_RUL
-ln -s /home/kde/.face.png /home/kde/.face.icon
+pids=()
+curl -s -o "${TMP_FILE}/wallpaper.png" "$WALLPAPER_URL" & pids+=($!)
+curl -s -o "${TMP_FILE}/lock_wallpaper.png" "$LOCK_SCRREN_WALLPAPER_URL" & pids+=($!)
+curl -s -o /home/kde/.face.png "$PROFILE_PIC_RUL" & pids+=($!)
+for pid in "${pids[@]}"; do wait "$pid"; done
+ln -sf /home/kde/.face.png /home/kde/.face.icon
 
 # Set auto start
 IFS="," read -ra APPS <<< "$AUTO_START"
 mkdir -p /home/kde/.config/autostart/
 for app in "${APPS[@]}"; do
-    echo Validate ${app} desktop file
-    if [[ $(find /usr/share/applications/ -name $app | grep .) -eq 0 ]];
-    then
-      echo Copy ${app} desktop file into autostart
-      cp /usr/share/applications/${app}.desktop /home/kde/.config/autostart/
+    src="/usr/share/applications/${app}.desktop"
+    echo "Validate ${app} desktop file"
+    if [ -f "$src" ]; then
+      echo "Copy ${app} desktop file into autostart"
+      cp "$src" /home/kde/.config/autostart/
+    else
+      echo "[WARN] $src not found, skipping"
     fi
 done
 
@@ -85,16 +95,18 @@ sudo su - kde bash -c "\
     sleep 1; \
     pipewire-pulse & \
     sleep 1; \
+    touch \"\$XDG_RUNTIME_DIR/.plasma-start\"; \
     exec startplasma-wayland & \
     PLASMA_PID=\$!; \
     for i in \$(seq 1 30); do \
       echo \"Waiting for Wayland socket...\"; \
-      [ -S \"\$XDG_RUNTIME_DIR/wayland-0\" ] && break; \
+      WAYLAND_NAME=\$(find \"\$XDG_RUNTIME_DIR\" -maxdepth 1 -type s -name \"wayland-*\" -newer \"\$XDG_RUNTIME_DIR/.plasma-start\" -printf \"%f\n\" | head -n 1); \
+      [ -n \"\$WAYLAND_NAME\" ] && break; \
       sleep 1; \
     done; \
     sleep 3; \
-    echo \"Wayland socket ready, Set Display Resolution&Wallpaper...\"; \
-    export DISPLAY=:0 ;\
+    export WAYLAND_DISPLAY=\${WAYLAND_NAME:-wayland-0}; \
+    echo \"Wayland socket \$WAYLAND_DISPLAY ready, Set Display Resolution&Wallpaper...\"; \
     if [ -n \"$OUTPUT_NAME\" ] && [ -n \"$OUTPUT_MODE\" ]; then \
       kscreen-doctor output.$OUTPUT_NAME.scale.1; \
       kscreen-doctor output.$OUTPUT_NAME.mode.$OUTPUT_MODE; \
@@ -111,6 +123,11 @@ sudo su - kde bash -c "\
       sudo rm /etc/sudoers.d/kde
     fi
 
+    if [ -f /tmp/non_steam.sh ]; then \
+      chmod +x /tmp/non_steam.sh; \
+      /tmp/non_steam.sh; \
+    fi; \
+
     echo \"Starting Sunshine...\"; \
-    env WAYLAND_DISPLAY=wayland-0 XDG_SESSION_TYPE=wayland sunshine /home/kde/.config/sunshine/sunshine.conf
+    env WAYLAND_DISPLAY=\$WAYLAND_DISPLAY XDG_SESSION_TYPE=wayland sunshine /home/kde/.config/sunshine/sunshine.conf
   '"

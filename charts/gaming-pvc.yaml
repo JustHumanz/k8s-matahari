@@ -62,3 +62,16 @@ spec:
   resources:
     requests:
       storage: 10G
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: umu-launcher-pvc
+  namespace: gaming
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: nfs-fast
+  resources:
+    requests:
+      storage: 1G
