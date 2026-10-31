@@ -43,8 +43,8 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
 # Build and install umu-launcher from its upstream release
 # hadolint ignore=DL3037
 RUN zypper addrepo https://download.opensuse.org/repositories/games/openSUSE_Tumbleweed/games.repo && \
-    zypper --non-interactive --gpg-auto-import-keys up && \
-    zypper install -y umu-launcher && \
+    zypper --retry 3 --non-interactive --gpg-auto-import-keys up && \
+    zypper --retry 3 install -y umu-launcher && \
     zypper clean
 
 
