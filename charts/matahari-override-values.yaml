@@ -23,38 +23,7 @@ configMap:
     toggle_hud=F8
     vulkan_driver
   steamBootstrap: |-
-    # Add Genshin
-    if ! ./nonsteam get | grep -q 'Genshin impact'; then
-        echo "Add Genshin impact into non steam library"
-        ./nonsteam add -w \
-          --app-name "Genshin impact" \
-          --exe '"/mnt/data/genshin/Genshin Impact game/GenshinImpact.exe"' \
-          --start-dir '"/mnt/data/genshin/Genshin Impact game/"' \
-          --image-grid "https://cdn2.steamgriddb.com/thumb/a38cdef9f6c911c17932d6214d8a31d2.jpg" \
-          --image-grid-horiz "https://cdn2.steamgriddb.com/thumb/a0e58c078833b1ff8654ae48cdc26267.jpg" \
-          --image-hero "https://cdn2.steamgriddb.com/hero_thumb/58c80ac32913fe75b84cf00a8eed5515.jpg" \
-          --image-logo "https://cdn2.steamgriddb.com/logo_thumb/944eefd22dfe99fe7631b8ecc732c7cf.png" \
-          --launch-options "mangohud %command%" \
-          --allow-overlay
-    fi
-
-    # Add steam compatibility tools
-    COMPAT_DIR="/home/kde/.local/share/Steam/compatibilitytools.d"
-    TOOL_DIR="$COMPAT_DIR/dwproton-11.0-15-x86_64"
-    TOOL_ARCHIVE="dwproton-11.0-15-x86_64.tar.xz"
-
-    mkdir -p "$COMPAT_DIR"
-    cd "$COMPAT_DIR" || exit 1
-
-    if [ -d "$TOOL_DIR" ]; then
-        echo "Dwproton already installed at $TOOL_DIR"
-    else
-        echo "Downloading Dwproton compatibility tools"
-        wget "https://dawn.wine/dawn-winery/dwproton/releases/download/dwproton-11.0-15/dwproton-11.0-15-x86_64.tar.xz" -O "$TOOL_ARCHIVE"
-        tar -xf "$TOOL_ARCHIVE"
-        chown -R 1000:1000 "$TOOL_DIR"
-        rm -f "$TOOL_ARCHIVE"
-    fi
+    IyBBZGQgR2Vuc2hpbgppZiAhIC4vbm9uc3RlYW0gZ2V0IHwgZ3JlcCAtcSAnR2Vuc2hpbiBpbXBhY3QnOyB0aGVuCiAgICBlY2hvICJBZGQgR2Vuc2hpbiBpbXBhY3QgaW50byBub24gc3RlYW0gbGlicmFyeSIKICAgIC4vbm9uc3RlYW0gYWRkIC13IFwKICAgICAgICAtLWFwcC1uYW1lICJHZW5zaGluIGltcGFjdCIgXAogICAgICAgIC0tZXhlICciL21udC9kYXRhL2dlbnNoaW4vR2Vuc2hpbiBJbXBhY3QgZ2FtZS9HZW5zaGluSW1wYWN0LmV4ZSInIFwKICAgICAgICAtLXN0YXJ0LWRpciAnIi9tbnQvZGF0YS9nZW5zaGluL0dlbnNoaW4gSW1wYWN0IGdhbWUvIicgXAogICAgICAgIC0taW1hZ2UtZ3JpZCAiaHR0cHM6Ly9jZG4yLnN0ZWFtZ3JpZGRiLmNvbS90aHVtYi9hMzhjZGVmOWY2YzkxMWMxNzkzMmQ2MjE0ZDhhMzFkMi5qcGciIFwKICAgICAgICAtLWltYWdlLWdyaWQtaG9yaXogImh0dHBzOi8vY2RuMi5zdGVhbWdyaWRkYi5jb20vdGh1bWIvYTBlNThjMDc4ODMzYjFmZjg2NTRhZTQ4Y2RjMjYyNjcuanBnIiBcCiAgICAgICAgLS1pbWFnZS1oZXJvICJodHRwczovL2NkbjIuc3RlYW1ncmlkZGIuY29tL2hlcm9fdGh1bWIvNThjODBhYzMyOTEzZmU3NWI4NGNmMDBhOGVlZDU1MTUuanBnIiBcCiAgICAgICAgLS1pbWFnZS1sb2dvICJodHRwczovL2NkbjIuc3RlYW1ncmlkZGIuY29tL2xvZ29fdGh1bWIvOTQ0ZWVmZDIyZGZlOTlmZTc2MzFiOGVjYzczMmM3Y2YucG5nIiBcCiAgICAgICAgLS1sYXVuY2gtb3B0aW9ucyAibWFuZ29odWQgJWNvbW1hbmQlIiBcCiAgICAgICAgLS1hbGxvdy1vdmVybGF5CmZpCgojIEFkZCBzdGVhbSBjb21wYXRpYmlsaXR5IHRvb2xzCkNPTVBBVF9ESVI9Ii9ob21lL2tkZS8ubG9jYWwvc2hhcmUvU3RlYW0vY29tcGF0aWJpbGl0eXRvb2xzLmQiClRPT0xfRElSPSIkQ09NUEFUX0RJUi9kd3Byb3Rvbi0xMS4wLTE1LXg4Nl82NCIKVE9PTF9BUkNISVZFPSJkd3Byb3Rvbi0xMS4wLTE1LXg4Nl82NC50YXIueHoiCgpta2RpciAtcCAiJENPTVBBVF9ESVIiCmNkICIkQ09NUEFUX0RJUiIgfHwgZXhpdCAxCgppZiBbIC1kICIkVE9PTF9ESVIiIF07IHRoZW4KICAgIGVjaG8gIkR3cHJvdG9uIGFscmVhZHkgaW5zdGFsbGVkIGF0ICRUT09MX0RJUiIKZWxzZQogICAgZWNobyAiRG93bmxvYWRpbmcgRHdwcm90b24gY29tcGF0aWJpbGl0eSB0b29scyIKICAgIHdnZXQgImh0dHBzOi8vZGF3bi53aW5lL2Rhd24td2luZXJ5L2R3cHJvdG9uL3JlbGVhc2VzL2Rvd25sb2FkL2R3cHJvdG9uLTExLjAtMTUvZHdwcm90b24tMTEuMC0xNS14ODZfNjQudGFyLnh6IiAtTyAiJFRPT0xfQVJDSElWRSIKICAgIHRhciAteGYgIiRUT09MX0FSQ0hJVkUiCiAgICBjaG93biAtUiAxMDAwOjEwMDAgIiRUT09MX0RJUiIKICAgIHJtIC1mICIkVE9PTF9BUkNISVZFIgpmaQoKIyBBZGQgbGF1bmNoZXJzIHRvIFVtVS1sYXVuY2hlcgpEQVRBX0hPTUU9Ii9ob21lL2tkZS8ubG9jYWwvc2hhcmUiCkFQUF9ESVI9IiREQVRBX0hPTUUvYXBwbGljYXRpb25zIgpJQ09OX0RJUj0iJERBVEFfSE9NRS9pY29ucyIKCmZvciBjbWQgaW4gd3Jlc3Rvb2wgaWNvdG9vbDsgZG8KICAgIGNvbW1hbmQgLXYgIiRjbWQiID4vZGV2L251bGwgfHwgeyBlY2hvICIkY21kIG5vdCBmb3VuZCAoaW5zdGFsbCBpY291dGlscykiID4mMjsgZXhpdCAxOyB9CmRvbmUKbWtkaXIgLXAgIiRBUFBfRElSIiAiJElDT05fRElSIgoKIyBVc2FnZTogYWRkX3VtdV9sYXVuY2hlciA8bmFtZT4gPHNsdWc+IDxleGU+IDxnYW1laWQ+CmFkZF91bXVfbGF1bmNoZXIoKSB7CiAgICBhcHBfbmFtZT0iJDEiOyBzbHVnPSIkMiI7IGV4ZT0iJDMiOyBnYW1lX2lkPSIkNCIKICAgIGRlc2t0b3BfZmlsZT0iJEFQUF9ESVIvJGFwcF9uYW1lLmRlc2t0b3AiCiAgICBpY29uX2ZpbGU9IiRJQ09OX0RJUi8kc2x1Zy5wbmciCgogICAgWyAtZiAiJGV4ZSIgXSB8fCB7IGVjaG8gIk1pc3NpbmcgJGV4ZSwgc2tpcHBpbmcgJGFwcF9uYW1lIiA+JjI7IHJldHVybiAxOyB9CgogICAgdG1wX2Rpcj0iJChta3RlbXAgLWQpIgogICAgIyBSZXNvdXJjZSB0eXBlIDE0IGlzIFJUX0dST1VQX0lDT04KICAgIHdyZXN0b29sIC14IC0tdHlwZT0xNCAtLW91dHB1dD0iJHRtcF9kaXIvbGF1bmNoZXIuaWNvIiAiJGV4ZSIKICAgIGljb3Rvb2wgLXggLS1vdXRwdXQ9IiR0bXBfZGlyIiAiJHRtcF9kaXIvbGF1bmNoZXIuaWNvIgoKICAgICMgTGFyZ2VzdCBleHRyYWN0ZWQgUE5HIGJlY29tZXMgdGhlIGljb24KICAgIGNwICIkKGxzIC1TICIkdG1wX2RpciIvKi5wbmcgfCBoZWFkIC1uIDEpIiAiJGljb25fZmlsZSIKICAgIHJtIC1yZiAiJHRtcF9kaXIiCgogICAgY2F0ID4gIiRkZXNrdG9wX2ZpbGUiIDw8RU9GCltEZXNrdG9wIEVudHJ5XQpUeXBlPUFwcGxpY2F0aW9uCk5hbWU9JGFwcF9uYW1lCkV4ZWM9ZW52IFBST1RPTlBBVEg9ZHdwcm90b24tMTEuMC0xNS14ODZfNjQgR0FNRUlEPSRnYW1lX2lkIG1hbmdvaHVkIHVtdS1ydW4gIiRleGUiCkNvbW1lbnQ9TGF1bmNoICRhcHBfbmFtZSB2aWEgdW11LXJ1biB3aXRoIE1hbmdvSHVkIG92ZXJsYXkKSWNvbj0kaWNvbl9maWxlCkNhdGVnb3JpZXM9R2FtZTsKVGVybWluYWw9ZmFsc2UKRU9GCgogICAgY2htb2QgK3ggIiRkZXNrdG9wX2ZpbGUiCiAgICBlY2hvICJDcmVhdGVkICRkZXNrdG9wX2ZpbGUiCn0KCmFkZF91bXVfbGF1bmNoZXIgIkdyeXBobGluZSIgImdyeXBobGluZSIgIi9tbnQvZGF0YS9lbmRmaWVsZC9HUllQSExJTksvTGF1bmNoZXIuZXhlIiAidW11LWVuZGZpZWxkIgphZGRfdW11X2xhdW5jaGVyICJIb1lvUGxheSIgImhveW9wbGF5IiAiL21udC9kYXRhL2dlbnNoaW4vSG9Zb1BsYXkvbGF1bmNoZXIuZXhlIiAidW11LWdlbnNoaW4iCmFkZF91bXVfbGF1bmNoZXIgIlplbmxlc3MgWm9uZSBaZXJvIiAiemVubGVzc3plcm8iICIvbW50L2RhdGEvenp6L1plbmxlc3Nab25lWmVybyBHYW1lL1plbmxlc3Nab25lWmVyby5leGUiICJ1bXUtemVubGVzc3pvbmV6ZXJvIgo=
 
 service:
   env:
@@ -71,6 +40,10 @@ service:
     - name: steam-compatibilitytools
       pvcName: steam-compatibilitytools-pvc
       mountPath: /home/kde/.local/share/Steam/compatibilitytools.d
+
+    - name: umu-launcher
+      pvcName: umu-launcher-pvc
+      mountPath: /home/kde/.local/share/umu
 
     - name: endfield-volume
       pvcName: endfield-pvc
@@ -114,4 +87,10 @@ service:
       size: 64Mi
       storageClass: ceph-rbd
       mountPath: /home/kde/.config/WarThunder
+      chown: True
+
+    - name: umu-profile
+      size: 2G
+      storageClass: ceph-rbd
+      mountPath: /home/kde/Games
       chown: True

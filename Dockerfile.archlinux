@@ -27,9 +27,9 @@ RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
     sudo \
     nvtop \
     mangohud \
-    wget \
+    wget icoutils \
     fakeroot debugedit patch \
-    protontricks \
+    protontricks umu-launcher \
     gstreamer gst-plugins-base gst-plugins-good gst-plugins-bad gst-plugins-ugly gst-libav \
     noto-fonts noto-fonts-cjk noto-fonts-emoji xorg-xrdb xorg-xhost \
     && pacman -Scc --noconfirm
