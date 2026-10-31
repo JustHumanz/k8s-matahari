@@ -37,17 +37,22 @@ RUN zypper --non-interactive install -t pattern kde kde_plasma && \
         libva-drm2 \
         protontricks icoutils \
         gstreamer gstreamer-plugins-base gstreamer-plugins-good gstreamer-plugins-bad gstreamer-plugins-ugly \
-        sudo seatd dbus-1 google-noto-sans-cjk-fonts
+        sudo seatd dbus-1 google-noto-sans-cjk-fonts && \
+    zypper clean
 
 # Build and install umu-launcher from its upstream release
+# hadolint ignore=DL3037
 RUN zypper addrepo https://download.opensuse.org/repositories/games/openSUSE_Tumbleweed/games.repo && \
     zypper --non-interactive --gpg-auto-import-keys up && \
-    zypper install -y umu-launcher
+    zypper install -y umu-launcher && \
+    zypper clean
 
 
+# hadolint ignore=DL3037
 RUN zypper --non-interactive install -y boost-devel libminiupnpc21 \
     libboost_log-devel \
-    libboost_program_options-devel
+    libboost_program_options-devel && \
+    zypper clean
 
 # Patch for sunsine
 RUN ln -sf /usr/lib64/libboost_log.so /usr/lib64/libboost_log.so.1.91.0 && \
@@ -66,12 +71,15 @@ RUN chmod +x /tmp/nvidia.sh && \
 
 # Add gaming tools repository and install additional packages (optional)
 # hadolint ignore=DL3037
-RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam
+RUN zypper install -y --auto-agree-with-licenses nvtop mangohud steam && \
+    zypper clean
 
 # Add the sunshine repository and install sunshine (optional)
 RUN zypper addrepo  https://download.opensuse.org/repositories/games:/tools/openSUSE_Tumbleweed/games:tools.repo && \
     zypper --non-interactive --gpg-auto-import-keys up
-RUN zypper --non-interactive install -y libboost_filesystem*-devel &&\
+# hadolint ignore=DL3037
+RUN zypper --non-interactive install -y libboost_filesystem*-devel && \
+    zypper clean && \
     zypper --pkg-cache-dir /tmp download sunshine
 
 # Configure locale for openSUSE Tumbleweed
