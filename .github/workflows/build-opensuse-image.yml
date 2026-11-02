@@ -36,13 +36,28 @@ jobs:
         env:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
-        run: printf '%s' "$HARBOR_PASSWORD" | skopeo login --username "$HARBOR_USERNAME" --password-stdin hub.humanz.moe
+        run: |
+          printf '%s' "$HARBOR_PASSWORD" |
+            skopeo login \
+              --authfile "$RUNNER_TEMP/containers-auth.json" \
+              --username "$HARBOR_USERNAME" \
+              --password-stdin \
+              hub.humanz.moe
 
       - name: Push opensuse linux image base
-        run: >-
-          docker run --privileged -v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock \
-          quay.io/skopeo/stable copy \
-          containers-storage:localhost/matahari:opensuse-kde-nvidia-${GITHUB_REF_NAME} \
-          docker://hub.humanz.moe/gaming/matahari:opensuse-kde-nvidia-${GITHUB_REF_NAME}
+        run: |
+          set -euo pipefail
+          image="localhost/matahari:opensuse-kde-nvidia-${GITHUB_REF_NAME}"
+          archive_dir="$(mktemp -d "$RUNNER_TEMP/matahari-XXXXXX")"
+          archive="$archive_dir/image.tar"
+          trap 'rm -rf "$archive_dir"' EXIT
+          buildah push "$image" "docker-archive:$archive:$image"
+          docker run --rm --privileged \
+            --volume "$archive:/image.tar:ro" \
+            --volume "$RUNNER_TEMP/containers-auth.json:/auth.json:ro" \
+            quay.io/skopeo/stable copy \
+            --authfile /auth.json \
+            "docker-archive:/image.tar:$image" \
+            "docker://hub.humanz.moe/gaming/matahari:opensuse-kde-nvidia-${GITHUB_REF_NAME}"
 
-      ### TODO: build the image for amd gpu            
+      ### TODO: build the image for amd gpu
