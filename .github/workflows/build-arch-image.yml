@@ -40,8 +40,9 @@ jobs:
 
       - name: Push arch linux image base
         run: >-
-          skopeo copy
-          containers-storage:localhost/matahari:archlinux-kde-nvidia-${GITHUB_REF_NAME}
+          docker run --privileged -v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock \
+          quay.io/skopeo/stable copy \
+          containers-storage:localhost/matahari:archlinux-kde-nvidia-${GITHUB_REF_NAME} \
           docker://hub.humanz.moe/gaming/matahari:archlinux-kde-nvidia-${GITHUB_REF_NAME}
       
       ### TODO: build the image for amd gpu
