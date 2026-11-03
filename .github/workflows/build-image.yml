@@ -1,0 +1,105 @@
+name: Build base images
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Image tag suffix (defaults to dev-<short sha>)"
+        required: false
+        type: string
+      distro:
+        description: "Distro to build"
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - archlinux
+          - opensuse
+
+concurrency:
+  group: build-image-${{ github.ref }}-${{ inputs.version || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-push:
+    name: Build ${{ matrix.distro }}
+    runs-on: ubuntu-latest
+    environment: Builder
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - archlinux
+          - opensuse
+
+    # Manual runs can target one distro, so a failed leg can be re-run without a new tag.
+    if: github.event_name != 'workflow_dispatch' || inputs.distro == 'all' || inputs.distro == matrix.distro
+
+    env:
+      DISTRO: ${{ matrix.distro }}
+      INPUT_VERSION: ${{ inputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve image version
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            version="$GITHUB_REF_NAME"
+          else
+            version="${INPUT_VERSION:-dev-${GITHUB_SHA::7}}"
+          fi
+          echo "VERSION=$version" >>"$GITHUB_ENV"
+
+      - name: Install Buildah and Skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes buildah skopeo
+
+      - name: Build image
+        run: >-
+          buildah bud
+          --format docker
+          --build-arg GPU=NVIDIA
+          --file "./Dockerfile.${DISTRO}"
+          --tag "localhost/matahari:${DISTRO}-kde-nvidia-${VERSION}"
+          .
+
+      - name: Log in to Harbor with Skopeo
+        env:
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          printf '%s' "$HARBOR_PASSWORD" |
+            skopeo login \
+              --authfile "$RUNNER_TEMP/containers-auth.json" \
+              --username "$HARBOR_USERNAME" \
+              --password-stdin \
+              hub.humanz.moe
+
+      - name: Push image
+        run: |
+          set -euo pipefail
+          image="localhost/matahari:${DISTRO}-kde-nvidia-${VERSION}"
+          archive_dir="$(mktemp -d "$RUNNER_TEMP/matahari-XXXXXX")"
+          archive="$archive_dir/image.tar"
+          trap 'rm -rf "$archive_dir"' EXIT
+          buildah push "$image" "docker-archive:$archive:$image"
+          docker run --rm --privileged \
+            --volume "$archive:/image.tar:ro" \
+            --volume "$RUNNER_TEMP/containers-auth.json:/auth.json:ro" \
+            quay.io/skopeo/stable copy \
+            --authfile /auth.json \
+            "docker-archive:/image.tar:$image" \
+            "docker://hub.humanz.moe/gaming/matahari:${DISTRO}-kde-nvidia-${VERSION}"
+
+      ### TODO: build the image for amd gpu
