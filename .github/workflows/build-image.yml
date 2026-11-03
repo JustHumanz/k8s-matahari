@@ -25,8 +25,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      distros: ${{ steps.pick.outputs.distros }}
+    steps:
+      # The matrix context is unavailable in job-level `if`, so the distro list is built here.
+      - name: Select distros
+        id: pick
+        env:
+          INPUT_DISTRO: ${{ inputs.distro }}
+        run: |
+          case "${INPUT_DISTRO:-all}" in
+            all) echo 'distros=["archlinux","opensuse"]' >>"$GITHUB_OUTPUT" ;;
+            archlinux|opensuse) echo "distros=[\"$INPUT_DISTRO\"]" >>"$GITHUB_OUTPUT" ;;
+            *) echo "Unknown distro: $INPUT_DISTRO" >&2; exit 1 ;;
+          esac
+
   build-and-push:
     name: Build ${{ matrix.distro }}
+    needs: plan
     runs-on: ubuntu-latest
     environment: Builder
     permissions:
@@ -35,12 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro:
-          - archlinux
-          - opensuse
-
-    # Manual runs can target one distro, so a failed leg can be re-run without a new tag.
-    if: github.event_name != 'workflow_dispatch' || inputs.distro == 'all' || inputs.distro == matrix.distro
+        distro: ${{ fromJSON(needs.plan.outputs.distros) }}
 
     env:
       DISTRO: ${{ matrix.distro }}
